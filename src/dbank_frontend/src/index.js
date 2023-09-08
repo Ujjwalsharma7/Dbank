@@ -1,19 +1,36 @@
-import { dbank_backend } from "../../declarations/dbank_backend";
+import {dbank_backend} from '../../declarations/dbank_backend';
 
-document.querySelector("form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const button = e.target.querySelector("button");
+window.addEventListener("load", async function(){
+  // console.log("finished loading");
+  const currentAmount = await  dbank_backend.checkBalance();
+  this.document.getElementById("value").innerText = currentAmount;
+})
 
-  const name = document.getElementById("name").value.toString();
+document.querySelector("form").addEventListener("submit", async function(event){
+  event.preventDefault();
+  // console.log("submitted");
+  const btn = event.target.querySelector("#submit-btn");  
+  const inputAmount = parseFloat(document.getElementById("ip-amount").value);
+  const outputAmount = parseFloat(document.getElementById('withdraw-amount').value);
 
-  button.setAttribute("disabled", true);
+  btn.setAttribute("disabled", true); 
 
-  // Interact with foo actor, calling the greet method
-  const greeting = await dbank_backend.greet(name);
+  if (document.getElementById("ip-amount").value.length != 0){
+  await dbank_backend.topUp(inputAmount);
+  }
 
-  button.removeAttribute("disabled");
+   if (document.getElementById("withdraw-amount").value.length != 0){
+  await dbank_backend.decrease(outputAmount);
+  }
 
-  document.getElementById("greeting").innerText = greeting;
+  await dbank_backend.compound();
 
-  return false;
+
+  const currentAmount = await  dbank_backend.checkBalance();
+  document.getElementById("value").innerText = currentAmount;
+
+  document.getElementById("ip-amount").value = "";
+  document.getElementById("withdraw-amount").value = "";
+
+  btn.removeAttribute("disabled");
 });
